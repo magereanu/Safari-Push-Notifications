@@ -9,6 +9,9 @@
 
 $certificate_path = "Cert";     // Change this to the path where your certificate is located
 $certificate_password = "Pass"; // Change this to the certificate's import password
+// as of 14 february 2016 apple requires your push package creator to have
+// an extra certificate "WWDR certificate" -> get yours from apple "AppleWWDRCA.cer" and convert it to .pem
+$extracert = 'extracert'; 
 
 // Convenience function that returns an array of raw files needed to construct the package.
 function raw_files() {
@@ -63,7 +66,7 @@ function create_signature($package_dir, $cert_path, $cert_password) {
     // Sign the manifest.json file with the private key from the certificate
     $cert_data = openssl_x509_read($certs['cert']);
     $private_key = openssl_pkey_get_private($certs['pkey'], $cert_password);
-    openssl_pkcs7_sign("$package_dir/manifest.json", $signature_path, $cert_data, $private_key, array(), PKCS7_BINARY | PKCS7_DETACHED);
+    openssl_pkcs7_sign("$package_dir/manifest.json", $signature_path, $cert_data, $private_key, array(), PKCS7_BINARY | PKCS7_DETACHED,$extracert);
 
     // Convert the signature from PEM to DER
     $signature_pem = file_get_contents($signature_path);
